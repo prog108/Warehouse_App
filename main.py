@@ -1,5 +1,7 @@
 from tkinter import *
 from sqlite3 import *
+from tkinter import Toplevel, Frame, Label, Listbox, ttk
+
 
 class FoodStorageApp:
     def __init__(self, window):
@@ -22,6 +24,7 @@ class FoodStorageApp:
         self.window.option_add('*Label.Foreground', 'white')
         self.window.option_add('*Button.Background', 'darkred')
         self.window.option_add('*Button.Foreground', 'white')
+        
 
 #----------------------------------
 # FRAMES FOR GRID POSITIONING
@@ -89,6 +92,65 @@ class FoodStorageApp:
         Button(frame3, text='Remove quantity', command=self.remove_quantity).pack(pady=10)
         Button(frame4, text='Add quantity', command=self.add_to).pack(pady=10)
         Button(frame4, text='Delete the item', command=self.remove_from).pack(pady=10)
+        Button(frame3, text='Show data', command = self.create_show_window).pack(pady=10)
+
+    def create_show_window(self):
+        
+        def show_all():
+            show_all_window=Toplevel()
+            show_all_window.geometry('400x300')
+            tree = ttk.Treeview(show_all_window, columns=('Name', 'Category', 'Quantity', 'Location'), show='headings')
+            tree.heading('Name', text='NAME', anchor='w')
+            tree.heading('Category', text='CATEGORY', anchor='w') #anchor(west) aligns the text to the left
+            tree.heading('Quantity', text='QUANTITY', anchor='w')
+            tree.heading('Location', text='LOCATION', anchor='w')
+
+            tree.pack(fill='both', expand=True)
+            # Adjusting the column widths
+            tree.column('Name', width=100)
+            tree.column('Category', width=100)
+            tree.column('Quantity', width=100)
+            tree.column('Location', width=100)
+          
+
+            q = '''
+            SELECT * FROM Foodstufs
+            '''
+#LISTBOX DOESN'T SUPPORT COMPLICATED FORMMATING: THUS WE USE Treview
+            lines = self.c.execute(q)
+            for line in lines:
+                tree.insert('', 'end', values=(line))
+            show_all_window.mainloop()
+
+        def create_show_widgets():
+            Frame1_inshow = Frame(self.show_window)
+            Frame1_inshow.grid(row=0, columnspan=2, sticky='nsew', pady=10)
+            Ltitle = Label(Frame1_inshow, text='SHOW DATA FROM DATABASE').pack(pady=10)
+
+            Frame2_inshow = Frame(self.show_window)
+            Frame2_inshow.grid(row=1, column=0, sticky='nsew', pady=10)
+            Bshow_all = Button(Frame2_inshow, text='SHOW ALL DATA', command=show_all).pack(pady=10)
+
+            self.show_window.grid_rowconfigure(0, weight=1)
+            self.show_window.grid_columnconfigure(0, weight=1)
+            self.show_window.grid_rowconfigure(1, weight=1)
+            self.show_window.grid_columnconfigure(1, weight=1)
+
+        self.show_window = Toplevel(self.window)
+        self.show_window.geometry('333x300')
+        self.show_window['bg'] = 'white'
+        self.show_window.option_add('*Label.Foreground', 'black')  # Changed to black for visibility
+        self.show_window.option_add('*Label.Font', 'Arial 12 bold')
+        self.show_window.option_add('*Frame.Background', 'white')
+
+        create_show_widgets()
+
+        self.show_window.mainloop()
+
+
+        
+
+            
 
 #----------------------------------
 # FUNCTION TO OPEN AND ACCESS THE DATABASE IMMEDIATELY
@@ -251,10 +313,6 @@ class FoodStorageApp:
         else:
             self.Lmessage.config(text='Please, fill in all the fields.')
 
-        
-
-        
-       
 
 #----------------------------------
 # FUNCTION FOR DELETING ENTRY FILEDS
@@ -266,6 +324,11 @@ class FoodStorageApp:
         self.Elocation.delete(0, END)
 
 
+
+
+#----------------------------------
+# starting THE GUI with mainloop()
+#----------------------------------
 root = Tk()
 app = FoodStorageApp(root)
 root.mainloop()
