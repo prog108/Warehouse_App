@@ -97,9 +97,10 @@ class FoodStorageApp:
     def create_show_window(self):
         
         def show_all():
-            show_all_window=Toplevel()
-            show_all_window.geometry('400x300')
-            tree = ttk.Treeview(show_all_window, columns=('Name', 'Category', 'Quantity', 'Location'), show='headings')
+            self.show_all_window=Toplevel()
+            self.show_all_window.geometry('400x300')
+            
+            tree = ttk.Treeview(self.show_all_window, columns=('Name', 'Category', 'Quantity', 'Location'), show='headings')
             tree.heading('Name', text='NAME', anchor='w')
             tree.heading('Category', text='CATEGORY', anchor='w') #anchor(west) aligns the text to the left
             tree.heading('Quantity', text='QUANTITY', anchor='w')
@@ -111,8 +112,7 @@ class FoodStorageApp:
             tree.column('Category', width=100)
             tree.column('Quantity', width=100)
             tree.column('Location', width=100)
-          
-
+        
             q = '''
             SELECT * FROM Foodstufs
             '''
@@ -120,21 +120,53 @@ class FoodStorageApp:
             lines = self.c.execute(q)
             for line in lines:
                 tree.insert('', 'end', values=(line))
-            show_all_window.mainloop()
+            self.show_all_window.mainloop()
+
+        def show_all_items():
+            self.show_all_window=Toplevel()
+            self.show_all_window.geometry('400x300')
+            self.show_all_window.option_add('*Label.Background', 'white')
+
+            tree = ttk.Treeview(self.show_all_window, columns=('Name','Quantity'), show='headings')
+            tree.heading('Name', text='NAME', anchor='w')
+            tree.heading('Quantity', text='QUANTITY', anchor='w')
+
+            tree.pack(fill='both', expand=True)
+            # Adjusting the column widths
+            tree.column('Name', width=100)
+            tree.column('Quantity', width=100)
+        
+            q = '''
+            SELECT Name, Quantity FROM Foodstufs
+            '''
+#LISTBOX DOESN'T SUPPORT COMPLICATED FORMMATING: THUS WE USE Treview
+            lines = self.c.execute(q)
+
+            kg_counter = 0
+            for line in lines:
+                tree.insert('', 'end', values=(line))
+                kg_counter += line[1]
+            #tree.insert('', 'end', values=('', 'The sum of food in warehouse\n is {0} kilograms.'.format(kg_counter)))
+            Ldata_show = Label(self.show_all_window, text='The sum of food in warehouse\n is {0} kilograms.'.format(kg_counter))
+            Ldata_show.pack()
+            self.show_all_window.mainloop()
 
         def create_show_widgets():
             Frame1_inshow = Frame(self.show_window)
-            Frame1_inshow.grid(row=0, columnspan=2, sticky='nsew', pady=10)
-            Ltitle = Label(Frame1_inshow, text='SHOW DATA FROM DATABASE').pack(pady=10)
+            Frame1_inshow.grid(row=0, columnspan=3, sticky='nsew', pady=10)
+            Ltitle = Label(Frame1_inshow, text='SHOW DATA FROM DATABASE', bg='white').pack(pady=10)
 
             Frame2_inshow = Frame(self.show_window)
-            Frame2_inshow.grid(row=1, column=0, sticky='nsew', pady=10)
-            Bshow_all = Button(Frame2_inshow, text='SHOW ALL DATA', command=show_all).pack(pady=10)
+            Frame2_inshow.grid(row=1, column=1, sticky='nsew', pady=10)
+            Bshow_all = Button(Frame2_inshow, text='SHOW ALL DATA', command=show_all).pack(pady=10, side=LEFT)
+            Bshow_all_items = Button(Frame2_inshow, text='SHOW QUANTITY', command=show_all_items).pack(pady=10, side=RIGHT)
 
-            self.show_window.grid_rowconfigure(0, weight=1)
+            self.show_window.grid_rowconfigure(0, weight=0)
             self.show_window.grid_columnconfigure(0, weight=1)
-            self.show_window.grid_rowconfigure(1, weight=1)
+            self.show_window.grid_rowconfigure(1, weight=2)
             self.show_window.grid_columnconfigure(1, weight=1)
+            self.show_window.grid_rowconfigure(2, weight=5)
+            self.show_window.grid_columnconfigure(2, weight=1)
 
         self.show_window = Toplevel(self.window)
         self.show_window.geometry('333x300')
@@ -142,6 +174,8 @@ class FoodStorageApp:
         self.show_window.option_add('*Label.Foreground', 'black')  # Changed to black for visibility
         self.show_window.option_add('*Label.Font', 'Arial 12 bold')
         self.show_window.option_add('*Frame.Background', 'white')
+        self.show_window.option_add('*Button.Font', 'Arial 12 bold')
+
 
         create_show_widgets()
 
@@ -323,12 +357,12 @@ class FoodStorageApp:
         self.Equantity.delete(0, END)
         self.Elocation.delete(0, END)
 
-
-
-
 #----------------------------------
-# starting THE GUI with mainloop()
+# FUNCTION FOR SHOW WINDOW
 #----------------------------------
+
+
+
 root = Tk()
 app = FoodStorageApp(root)
 root.mainloop()
