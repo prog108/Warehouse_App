@@ -1,6 +1,6 @@
 from tkinter import *
 from sqlite3 import *
-from tkinter import Toplevel, Frame, Label, Listbox, ttk
+from tkinter import Toplevel, Frame, Label, ttk
 
 
 class FoodStorageApp:
